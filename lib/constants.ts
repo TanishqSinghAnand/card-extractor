@@ -5,96 +5,57 @@ export const CARD_TYPE_CONFIG: Record<CardTypeKey, {
   color: string;
   bg: string;
   border: string;
-  icon: string;
 }> = {
-  aadhar: {
-    label: 'Aadhar Card',
-    color: '#185FA5',
-    bg: '#E6F1FB',
-    border: '#B5D4F4',
-    icon: '🪪',
-  },
-  pan: {
-    label: 'PAN Card',
-    color: '#854F0B',
-    bg: '#FAEEDA',
-    border: '#FAC775',
-    icon: '📋',
-  },
-  bank: {
-    label: 'Bank Card',
-    color: '#3B6D11',
-    bg: '#EAF3DE',
-    border: '#C0DD97',
-    icon: '💳',
-  },
-  driving: {
-    label: 'Driving Licence',
-    color: '#993556',
-    bg: '#FBEAF0',
-    border: '#F4C0D1',
-    icon: '🚗',
-  },
-  voter: {
-    label: 'Voter ID',
-    color: '#534AB7',
-    bg: '#EEEDFE',
-    border: '#CECBF6',
-    icon: '🗳️',
-  },
-  passport: {
-    label: 'Passport',
-    color: '#993C1D',
-    bg: '#FAECE7',
-    border: '#F5C4B3',
-    icon: '📘',
-  },
-  unknown: {
-    label: 'Unknown Card',
-    color: '#5F5E5A',
-    bg: '#F1EFE8',
-    border: '#D3D1C7',
-    icon: '🪪',
-  },
+  aadhar:      { label: 'Aadhar Card',     color: '#185FA5', bg: '#E6F1FB', border: '#B5D4F4' },
+  pan:         { label: 'PAN Card',        color: '#854F0B', bg: '#FAEEDA', border: '#FAC775' },
+  bank:        { label: 'Bank Card',       color: '#3B6D11', bg: '#EAF3DE', border: '#C0DD97' },
+  driving:     { label: 'Driving Licence', color: '#993556', bg: '#FBEAF0', border: '#F4C0D1' },
+  voter:       { label: 'Voter ID',        color: '#534AB7', bg: '#EEEDFE', border: '#CECBF6' },
+  passport:    { label: 'Passport',        color: '#993C1D', bg: '#FAECE7', border: '#F5C4B3' },
+  national_id: { label: 'National ID',     color: '#185FA5', bg: '#E6F1FB', border: '#B5D4F4' },
+  student_id:  { label: 'Student ID',      color: '#0F6E56', bg: '#E1F5EE', border: '#9FE1CB' },
+  employee_id: { label: 'Employee ID',     color: '#533A00', bg: '#FFF8E6', border: '#FFD980' },
+  health_card: { label: 'Health Card',     color: '#7B1D1D', bg: '#FEF2F2', border: '#FECACA' },
+  unknown:     { label: 'Identity Card',   color: '#5F5E5A', bg: '#F1EFE8', border: '#D3D1C7' },
 };
 
-export const SCAN_PROMPT = `You are a card recognition AI. Analyze this image of an ID or payment card.
+export const SCAN_PROMPT = `You are an expert identity card recognition AI with global knowledge of all card formats.
 
-FIRST, identify the card type. It could be one of:
-- Aadhar Card (Indian national ID with 12-digit number, has name, DOB, address, photo)
-- PAN Card (Indian tax ID, has 10-char alphanumeric PAN number, name, DOB, father's name)
-- Driving Licence (Indian DL, has DL number, name, DOB, address, validity dates)
-- Voter ID Card (EPIC number, name, father's name, address, DOB, part number)
-- Passport (Indian passport, has passport number, name, nationality, DOB, expiry, place of birth)
-- Bank/Debit/Credit Card (card number, cardholder name, expiry date, bank name)
-- Other (describe what it is)
+STEP 1 — Identify the card type from this list:
+- Aadhar Card (India — 12-digit UID, name, DOB, address, photo)
+- PAN Card (India — 10-char alphanumeric, name, DOB, father's name)
+- Driving Licence (any country — DL number, name, DOB, address, validity, vehicle class)
+- Voter ID / Electoral Card (any country — voter number, name, address, DOB)
+- Passport (any country — passport number, name, nationality, DOB, expiry, MRZ)
+- Bank / Debit / Credit Card (card number, cardholder name, expiry, bank/network name)
+- National ID Card (any country — national ID number, name, DOB, nationality, address)
+- Student ID Card (institution name, student name, student ID, course, validity)
+- Employee ID Card (company name, employee name, employee ID, department, designation)
+- Health / Insurance Card (policy number, member name, group number, provider)
+- Any other card — describe accurately
 
-THEN extract ALL visible text fields from the card accurately.
+STEP 2 — Extract ALL visible text fields. Be thorough. Read both English and non-English text (Hindi, Arabic, French, Spanish, etc.).
 
-CRITICAL SECURITY RULES — you MUST follow these without exception:
-- For Aadhar numbers: mask first 8 digits, show only last 4 as "XXXX XXXX 1234"
-- For bank/debit/credit card numbers: mask all but last 4 digits as "**** **** **** 5678"
-- For CVV/CVC: NEVER reveal, always show "***"
-- For bank account numbers: mask middle digits
-- For UPI IDs or PINs: never reveal
-- Passport numbers, PAN numbers, DL numbers, Voter ID numbers: show in full (these are standard ID fields)
+CRITICAL SECURITY RULES:
+- Aadhar numbers: show only last 4 digits → "XXXX XXXX 1234"
+- Bank/debit/credit card numbers: show only last 4 → "**** **** **** 5678"
+- CVV/CVC: NEVER reveal → "***"
+- Bank account numbers / PINs / UPI IDs: never reveal
+- All other ID numbers (PAN, DL, Passport, Voter, Employee, Student): show in full
 
-Respond ONLY in this exact JSON format with no other text, preamble, or markdown:
+Respond ONLY in this exact JSON format — no markdown, no extra text:
 {
-  "cardType": "Aadhar Card",
-  "cardTypeKey": "aadhar",
+  "cardType": "Student ID Card",
+  "cardTypeKey": "student_id",
   "fields": [
-    {"label": "Name", "value": "Rahul Kumar Sharma", "full": false},
-    {"label": "Date of Birth", "value": "15/08/1992", "full": false},
-    {"label": "Father's Name", "value": "Suresh Sharma", "full": false},
-    {"label": "Gender", "value": "Male", "full": false},
-    {"label": "Aadhar Number", "value": "XXXX XXXX 4521", "full": false},
-    {"label": "Address", "value": "123 MG Road, Sector 4, New Delhi - 110001", "full": true}
+    {"label": "Institution", "value": "Panjab University Chandigarh UIET", "full": true},
+    {"label": "Name", "value": "Tanishq Singh Anand", "full": false},
+    {"label": "Student ID", "value": "12345", "full": false}
   ]
 }
 
-The "full" field should be true for wide fields like address, long names, or any value over 30 chars.
-cardTypeKey must be one of: aadhar, pan, bank, driving, voter, passport, unknown
+cardTypeKey must be exactly one of: aadhar, pan, bank, driving, voter, passport, national_id, student_id, employee_id, health_card, unknown
+The "full" field should be true for address, long text, or values over 35 characters.
 
-If no card is detected or image is unreadable:
+If no card is detected:
 {"cardType": "Not detected", "cardTypeKey": "unknown", "fields": [{"label": "Status", "value": "Could not detect a valid card. Please upload a clearer, well-lit photo.", "full": true}]}`;

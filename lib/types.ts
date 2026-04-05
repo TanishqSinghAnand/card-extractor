@@ -1,11 +1,7 @@
 export type CardTypeKey =
-  | 'aadhar'
-  | 'pan'
-  | 'bank'
-  | 'driving'
-  | 'voter'
-  | 'passport'
-  | 'unknown';
+  | 'aadhar' | 'pan' | 'bank' | 'driving' | 'voter'
+  | 'passport' | 'national_id' | 'student_id' | 'employee_id'
+  | 'health_card' | 'unknown';
 
 export interface CardField {
   label: string;
